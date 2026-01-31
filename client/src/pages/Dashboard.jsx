@@ -22,8 +22,18 @@ function Dashboard() {
     if (location.state?.prefetchedArticles) {
       setArticles(location.state.prefetchedArticles);
       setLoading(false);
-      // Clear the state so refresh works normally
+      // Clear the state and localStorage flag since we have fresh data
       window.history.replaceState({}, document.title);
+      localStorage.removeItem('lastSavedPreferences');
+      fetchSavedArticles();
+      return;
+    }
+
+    // Check if we came from Preferences with new preferences but no prefetched articles
+    if (location.state?.newPreferences) {
+      const prefs = location.state.newPreferences;
+      window.history.replaceState({}, document.title);
+      fetchNewsWithPreferences(prefs);
       fetchSavedArticles();
       return;
     }
@@ -45,7 +55,38 @@ function Dashboard() {
     fetchSavedArticles();
   }, []);
 
-  async function fetchNews(forceRefresh = false, retryCount = 0) {
+  // Fetch news using specific preferences (bypasses DB replication lag)
+  async function fetchNewsWithPreferences(preferences) {
+    try {
+      setLoading(true);
+      setError('');
+      setRateLimited(false);
+
+      const data = await api.getNews(true, preferences);
+
+      if (data.rateLimited) {
+        setRateLimited(true);
+        setError(data.message || 'Daily limit reached. Please try again tomorrow!');
+        return;
+      }
+
+      if (data.message && data.articles.length === 0) {
+        setError(data.message);
+      }
+
+      setArticles(data.articles || []);
+      // Clear localStorage since we successfully fetched with new prefs
+      localStorage.removeItem('lastSavedPreferences');
+    } catch (err) {
+      console.error('Failed to fetch news with preferences:', err);
+      // Fallback to normal fetch
+      fetchNews(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function fetchNews(forceRefresh = false) {
     try {
       setLoading(true);
       setError('');
@@ -53,40 +94,38 @@ function Dashboard() {
 
       // Check if we have recently saved preferences that need to sync
       const savedPrefsData = localStorage.getItem('lastSavedPreferences');
-      let needsVerification = false;
-      let expectedRawInput = null;
+      let prefsToUse = null;
 
       if (savedPrefsData) {
         const { preferences, savedAt } = JSON.parse(savedPrefsData);
         const ageInSeconds = (Date.now() - savedAt) / 1000;
-        // Only verify if preferences were saved in the last 60 seconds
+        // Only use cached preferences if saved in the last 60 seconds
         if (ageInSeconds < 60) {
-          needsVerification = true;
-          expectedRawInput = preferences.raw_input;
+          prefsToUse = preferences;
         } else {
           // Clear old saved preferences
           localStorage.removeItem('lastSavedPreferences');
         }
       }
 
-      // Fetch current preferences from server to verify sync
-      if (needsVerification && retryCount < 3) {
-        try {
-          const prefsData = await api.getPreferences();
-          const serverRawInput = prefsData.preferences?.raw_input;
+      // If we have recent preferences, use them directly to bypass DB lag
+      if (prefsToUse) {
+        console.log('Using cached preferences for news fetch');
+        const data = await api.getNews(true, prefsToUse);
 
-          if (serverRawInput !== expectedRawInput) {
-            console.log(`Preferences not synced yet (attempt ${retryCount + 1}), retrying...`);
-            // Wait 2 seconds and retry
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            return fetchNews(forceRefresh, retryCount + 1);
-          } else {
-            // Preferences synced, clear the saved data
-            localStorage.removeItem('lastSavedPreferences');
-          }
-        } catch (prefErr) {
-          console.error('Failed to verify preferences:', prefErr);
+        if (data.rateLimited) {
+          setRateLimited(true);
+          setError(data.message || 'Daily limit reached. Please try again tomorrow!');
+          return;
         }
+
+        if (data.message && data.articles.length === 0) {
+          setError(data.message);
+        }
+
+        setArticles(data.articles || []);
+        localStorage.removeItem('lastSavedPreferences');
+        return;
       }
 
       const data = await api.getNews(forceRefresh);

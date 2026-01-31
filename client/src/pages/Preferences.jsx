@@ -53,35 +53,43 @@ function Preferences() {
       const result = await api.updatePreferences(preferenceText);
       setSuccess('Preferences saved! Fetching your personalized news...');
 
-      // Store preferences locally to verify DB sync later
-      if (result.preferences) {
+      // Store preferences locally with the full result for immediate use
+      const savedPreferences = result.preferences;
+      if (savedPreferences) {
         localStorage.setItem('lastSavedPreferences', JSON.stringify({
-          preferences: result.preferences,
+          preferences: savedPreferences,
           savedAt: Date.now()
         }));
       }
 
-      // Wait for DB to sync, then prefetch news before navigating
-      // This ensures user sees fresh content when they land on news page
-      const maxRetries = 3;
-      const retryDelay = 2000; // 2 seconds between retries
+      // Fetch news immediately using the new preferences (bypasses DB replication lag)
+      // Pass preferences directly to the API to ensure we get fresh content
+      try {
+        // Small delay to let server process
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
-        try {
-          const newsData = await api.getNews(true);
-          if (newsData.articles && newsData.articles.length > 0) {
-            // News fetched successfully, pass data to Dashboard via navigation state
-            navigate('/news', { state: { prefetchedArticles: newsData.articles } });
-            return;
-          }
-        } catch (newsErr) {
-          console.log(`News fetch attempt ${attempt} failed:`, newsErr.message);
+        const newsData = await api.getNews(true, savedPreferences);
+        if (newsData.articles && newsData.articles.length > 0) {
+          // News fetched successfully, pass data to Dashboard via navigation state
+          navigate('/news', {
+            state: {
+              prefetchedArticles: newsData.articles,
+              preferencesUsed: savedPreferences
+            }
+          });
+          return;
         }
+      } catch (newsErr) {
+        console.log('News fetch with preferences failed:', newsErr.message);
       }
 
-      // If all retries failed, navigate anyway and let Dashboard fetch
-      navigate('/news?refresh=true');
+      // Fallback: navigate with preferences in state so Dashboard can use them
+      navigate('/news', {
+        state: {
+          forceRefresh: true,
+          newPreferences: savedPreferences
+        }
+      });
     } catch (err) {
       setError(err.message || 'Failed to save preferences');
     } finally {
