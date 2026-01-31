@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Layout, Typography, Row, Col, Card, Tag, Button, Spin, Alert, ConfigProvider, theme } from 'antd';
 import { SettingOutlined, BookOutlined, ReadOutlined } from '@ant-design/icons';
 import { api } from '../utils/api';
@@ -14,19 +14,28 @@ function Dashboard() {
   const [rateLimited, setRateLimited] = useState(false);
   const [savedArticleUrls, setSavedArticleUrls] = useState(new Set());
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    fetchNews();
+    // Check if we need to force refresh (e.g., after updating preferences)
+    const shouldRefresh = searchParams.get('refresh') === 'true';
+
+    fetchNews(shouldRefresh);
     fetchSavedArticles();
+
+    // Clear the refresh param from URL after using it
+    if (shouldRefresh) {
+      setSearchParams({}, { replace: true });
+    }
   }, []);
 
-  async function fetchNews() {
+  async function fetchNews(forceRefresh = false) {
     try {
       setLoading(true);
       setError('');
       setRateLimited(false);
 
-      const data = await api.getNews();
+      const data = await api.getNews(forceRefresh);
 
       if (data.rateLimited) {
         setRateLimited(true);

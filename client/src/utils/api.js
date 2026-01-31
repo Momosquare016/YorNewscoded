@@ -78,7 +78,7 @@ export const api = {
   }),
 
   // News endpoints
-  getNews: () => apiCall('/api/news'),
+  getNews: (refresh = false) => apiCall(`/api/news${refresh ? '?refresh=true' : ''}`),
 
   // Saved articles endpoints
   getSaved: () => apiCall('/api/saved'),

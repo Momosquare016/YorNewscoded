@@ -32,8 +32,9 @@ function clearUserCache(uid) {
 async function getNews(req, res) {
   try {
     const { uid } = req.user;
+    const forceRefresh = req.query.refresh === 'true';
 
-    console.log('Fetching news for user:', uid);
+    console.log('Fetching news for user:', uid, forceRefresh ? '(forcing refresh)' : '');
 
     // Check if rate limited - return error message
     if (isRateLimited()) {
@@ -45,10 +46,15 @@ async function getNews(req, res) {
       });
     }
 
-    // Check cache first
-    const cached = getCachedNews(uid);
-    if (cached) {
-      return res.json(cached);
+    // Check cache first (skip if refresh is forced)
+    if (!forceRefresh) {
+      const cached = getCachedNews(uid);
+      if (cached) {
+        return res.json(cached);
+      }
+    } else {
+      // Clear the old cache when forcing refresh
+      clearUserCache(uid);
     }
 
     // Get user preferences

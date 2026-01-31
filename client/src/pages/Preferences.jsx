@@ -54,7 +54,8 @@ function Preferences() {
       setSuccess('Preferences saved successfully!');
 
       setTimeout(() => {
-        navigate('/news');
+        // Navigate with refresh=true to force fetching new articles
+        navigate('/news?refresh=true');
       }, 1500);
     } catch (err) {
       setError(err.message || 'Failed to save preferences');
