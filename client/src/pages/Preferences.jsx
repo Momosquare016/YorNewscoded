@@ -53,8 +53,10 @@ function Preferences() {
       await api.updatePreferences(preferenceText);
       setSuccess('Preferences saved successfully!');
 
+      // Set flag to force refresh on next news fetch
+      sessionStorage.setItem('refreshNews', 'true');
+
       setTimeout(() => {
-        // Navigate with refresh=true to force fetching new articles
         navigate('/news?refresh=true');
       }, 1500);
     } catch (err) {

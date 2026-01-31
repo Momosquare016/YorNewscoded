@@ -18,15 +18,20 @@ function Dashboard() {
 
   useEffect(() => {
     // Check if we need to force refresh (e.g., after updating preferences)
-    const shouldRefresh = searchParams.get('refresh') === 'true';
+    const urlRefresh = searchParams.get('refresh') === 'true';
+    const storageRefresh = sessionStorage.getItem('refreshNews') === 'true';
+    const shouldRefresh = urlRefresh || storageRefresh;
+
+    // Clear the flags immediately
+    if (storageRefresh) {
+      sessionStorage.removeItem('refreshNews');
+    }
+    if (urlRefresh) {
+      setSearchParams({}, { replace: true });
+    }
 
     fetchNews(shouldRefresh);
     fetchSavedArticles();
-
-    // Clear the refresh param from URL after using it
-    if (shouldRefresh) {
-      setSearchParams({}, { replace: true });
-    }
   }, []);
 
   async function fetchNews(forceRefresh = false) {
