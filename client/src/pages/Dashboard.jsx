@@ -241,19 +241,19 @@ function Dashboard() {
                 {/* Left Side - Small Cards */}
                 <Col xs={24} md={8}>
                   {sideArticles.map((article, index) => (
-                    <a
+                    <div
                       key={article.url || index}
-                      href={article.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      <div style={{
+                      style={{
                         display: 'flex',
                         gap: 16,
                         marginBottom: 24,
-                        cursor: 'pointer'
-                      }}>
+                      }}
+                    >
+                      <a
+                        href={article.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <img
                           src={article.urlToImage || 'https://placehold.co/100x70/111/333?text=News'}
                           alt={article.title}
@@ -265,30 +265,52 @@ function Dashboard() {
                           }}
                           onError={(e) => { e.target.src = 'https://placehold.co/100x70/111/333?text=News'; }}
                         />
-                        <div>
-                          <Text style={{
-                            color: '#f5c518',
-                            fontSize: 11,
-                            letterSpacing: 1,
-                            display: 'block',
-                            marginBottom: 4
-                          }}>
-                            {getCategory(article)}
-                          </Text>
+                      </a>
+                      <div style={{ flex: 1 }}>
+                        <Text style={{
+                          color: '#f5c518',
+                          fontSize: 11,
+                          letterSpacing: 1,
+                          display: 'block',
+                          marginBottom: 4
+                        }}>
+                          {getCategory(article)}
+                        </Text>
+                        <a
+                          href={article.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ textDecoration: 'none' }}
+                        >
                           <Text style={{
                             color: '#fff',
                             fontSize: 14,
                             lineHeight: 1.4,
                             display: '-webkit-box',
-                            WebkitLineClamp: 3,
+                            WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden'
                           }}>
                             {article.title}
                           </Text>
-                        </div>
+                        </a>
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={savedArticleUrls.has(article.url) ? <HeartFilled style={{ color: '#f5c518' }} /> : <HeartOutlined />}
+                          onClick={() => handleSaveArticle(article)}
+                          disabled={savedArticleUrls.has(article.url)}
+                          style={{
+                            color: savedArticleUrls.has(article.url) ? '#f5c518' : '#666',
+                            padding: 0,
+                            marginTop: 4,
+                            height: 'auto'
+                          }}
+                        >
+                          {savedArticleUrls.has(article.url) ? 'Saved' : 'Save'}
+                        </Button>
                       </div>
-                    </a>
+                    </div>
                   ))}
                 </Col>
 
