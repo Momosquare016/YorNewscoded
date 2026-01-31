@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Layout, Typography, Row, Col, Card, Tag, Button, Spin, Alert, ConfigProvider, theme } from 'antd';
 import { SettingOutlined, BookOutlined, ReadOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons';
 import { api } from '../utils/api';
@@ -14,26 +14,24 @@ function Dashboard() {
   const [rateLimited, setRateLimited] = useState(false);
   const [savedArticleUrls, setSavedArticleUrls] = useState(new Set());
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
+    // Check if we have prefetched articles from Preferences page
+    if (location.state?.prefetchedArticles) {
+      setArticles(location.state.prefetchedArticles);
+      setLoading(false);
+      // Clear the state so refresh works normally
+      window.history.replaceState({}, document.title);
+      fetchSavedArticles();
+      return;
+    }
+
     // Check if we need to force refresh (e.g., after updating preferences)
     const urlRefresh = searchParams.get('refresh') === 'true';
     const storageRefresh = sessionStorage.getItem('refreshNews') === 'true';
     const shouldRefresh = urlRefresh || storageRefresh;
-
-    // Get cached preferences if available (to avoid database replication lag)
-    let cachedPreferences = null;
-    if (shouldRefresh) {
-      const cached = sessionStorage.getItem('cachedPreferences');
-      if (cached) {
-        try {
-          cachedPreferences = JSON.parse(cached);
-        } catch (e) {
-          console.error('Failed to parse cached preferences:', e);
-        }
-      }
-    }
 
     // Clear the flags immediately
     if (storageRefresh) {
@@ -42,20 +40,18 @@ function Dashboard() {
     if (urlRefresh) {
       setSearchParams({}, { replace: true });
     }
-    // Clear cached preferences after using them
-    sessionStorage.removeItem('cachedPreferences');
 
-    fetchNews(shouldRefresh, cachedPreferences);
+    fetchNews(shouldRefresh);
     fetchSavedArticles();
   }, []);
 
-  async function fetchNews(forceRefresh = false, cachedPreferences = null) {
+  async function fetchNews(forceRefresh = false) {
     try {
       setLoading(true);
       setError('');
       setRateLimited(false);
 
-      const data = await api.getNews(forceRefresh, cachedPreferences);
+      const data = await api.getNews(forceRefresh);
 
       if (data.rateLimited) {
         setRateLimited(true);

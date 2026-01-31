@@ -63,8 +63,8 @@ function Preferences() {
         try {
           const newsData = await api.getNews(true);
           if (newsData.articles && newsData.articles.length > 0) {
-            // News fetched successfully, navigate now
-            navigate('/news');
+            // News fetched successfully, pass data to Dashboard via navigation state
+            navigate('/news', { state: { prefetchedArticles: newsData.articles } });
             return;
           }
         } catch (newsErr) {
@@ -72,7 +72,7 @@ function Preferences() {
         }
       }
 
-      // If all retries failed, navigate anyway
+      // If all retries failed, navigate anyway and let Dashboard fetch
       navigate('/news?refresh=true');
     } catch (err) {
       setError(err.message || 'Failed to save preferences');
