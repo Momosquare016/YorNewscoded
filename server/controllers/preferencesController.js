@@ -1,5 +1,6 @@
 const db = require('../db');
 const { parsePreferences } = require('../services/groq');
+const { clearUserCache } = require('./newsController');
 
 // GET user preferences
 async function getPreferences(req, res) {
@@ -52,6 +53,9 @@ async function updatePreferences(req, res) {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
+
+    // Clear news cache so new preferences take effect immediately
+    clearUserCache(uid);
 
     res.json({
       message: 'Preferences updated successfully',

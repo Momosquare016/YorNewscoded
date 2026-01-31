@@ -22,6 +22,12 @@ function setCachedNews(uid, data) {
   });
 }
 
+// Clear cache for a user (called when preferences are updated)
+function clearUserCache(uid) {
+  newsCache.delete(uid);
+  console.log('Cleared news cache for user:', uid);
+}
+
 // GET personalized news feed
 async function getNews(req, res) {
   try {
@@ -152,4 +158,5 @@ async function getNews(req, res) {
 
 module.exports = {
   getNews,
+  clearUserCache,
 };
