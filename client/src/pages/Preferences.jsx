@@ -50,20 +50,30 @@ function Preferences() {
 
     try {
       setSubmitting(true);
-      const result = await api.updatePreferences(preferenceText);
-      setSuccess('Preferences saved successfully!');
+      await api.updatePreferences(preferenceText);
+      setSuccess('Preferences saved! Fetching your personalized news...');
 
-      // Set flag to force refresh on next news fetch
-      sessionStorage.setItem('refreshNews', 'true');
+      // Wait for DB to sync, then prefetch news before navigating
+      // This ensures user sees fresh content when they land on news page
+      const maxRetries = 3;
+      const retryDelay = 2000; // 2 seconds between retries
 
-      // Cache the preferences to avoid database replication lag issues
-      if (result.preferences) {
-        sessionStorage.setItem('cachedPreferences', JSON.stringify(result.preferences));
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        try {
+          const newsData = await api.getNews(true);
+          if (newsData.articles && newsData.articles.length > 0) {
+            // News fetched successfully, navigate now
+            navigate('/news');
+            return;
+          }
+        } catch (newsErr) {
+          console.log(`News fetch attempt ${attempt} failed:`, newsErr.message);
+        }
       }
 
-      setTimeout(() => {
-        navigate('/news?refresh=true');
-      }, 1500);
+      // If all retries failed, navigate anyway
+      navigate('/news?refresh=true');
     } catch (err) {
       setError(err.message || 'Failed to save preferences');
     } finally {
