@@ -34,25 +34,26 @@ function Register() {
   }
 
   return (
-    <Layout style={{ background: '#000', minHeight: 'calc(100vh - 64px)' }}>
+    <Layout style={{ background: '#000', minHeight: 'calc(100vh - 56px)' }}>
       <Content style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '60px 20px'
+        padding: '30px 16px'
       }}>
         <Card style={{
           background: '#111',
           border: '1px solid #222',
           width: '100%',
-          maxWidth: 420,
-          padding: '20px'
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <Title level={2} style={{ color: '#fff', marginBottom: 8 }}>
+          maxWidth: 400
+        }}
+        styles={{ body: { padding: '24px 16px' } }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <Title level={2} style={{ color: '#fff', marginBottom: 6, fontSize: 22 }}>
               Create Account
             </Title>
-            <Text style={{ color: '#666' }}>Join YorNews today</Text>
+            <Text style={{ color: '#666', fontSize: 13 }}>Join YorNews today</Text>
           </div>
 
           {error && (
@@ -134,8 +135,9 @@ function Register() {
                   background: '#f5c518',
                   borderColor: '#f5c518',
                   color: '#000',
-                  height: 48,
-                  fontWeight: 500
+                  height: 44,
+                  fontWeight: 500,
+                  fontSize: 14
                 }}
               >
                 {loading ? 'Creating account...' : 'Sign Up'}
@@ -144,7 +146,7 @@ function Register() {
           </Form>
 
           <div style={{ textAlign: 'center' }}>
-            <Text style={{ color: '#666' }}>
+            <Text style={{ color: '#666', fontSize: 13 }}>
               Already have an account?{' '}
               <Link to="/login" style={{ color: '#f5c518' }}>
                 Log in

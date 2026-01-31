@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Layout, Button, Space, Typography } from 'antd';
-import { ReadOutlined, BookOutlined, SettingOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Layout, Button, Space, Typography, Drawer } from 'antd';
+import { ReadOutlined, BookOutlined, SettingOutlined, UserOutlined, LogoutOutlined, MenuOutlined, CloseOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 
 const { Header } = Layout;
@@ -9,109 +10,225 @@ const { Text } = Typography;
 function Navbar() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   async function handleLogout() {
     try {
       await logout();
       navigate('/');
+      setMobileMenuOpen(false);
     } catch (error) {
       console.error('Failed to log out:', error);
     }
   }
 
-  return (
-    <Header style={{
-      background: '#000',
-      borderBottom: '1px solid #222',
-      padding: '0 60px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      position: 'sticky',
-      top: 0,
-      zIndex: 1000,
-      height: 64
-    }}>
-      {/* Logo */}
-      <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{
-          width: 32,
-          height: 32,
-          background: '#f5c518',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 18 }}>Y</Text>
-        </div>
-        <Text style={{
-          color: '#fff',
-          fontSize: 18,
-          fontWeight: 400,
-          letterSpacing: 2,
-          fontFamily: "'Georgia', serif"
-        }}>
-          YORNEWS
-        </Text>
-      </Link>
+  const navLinks = currentUser ? [
+    { to: '/news', icon: <ReadOutlined />, label: 'Dashboard' },
+    { to: '/saved', icon: <BookOutlined />, label: 'Saved' },
+    { to: '/preferences', icon: <SettingOutlined />, label: 'Preferences' },
+    { to: '/profile', icon: <UserOutlined />, label: 'Profile' },
+  ] : [];
 
-      {/* Navigation Links */}
-      <Space size="middle">
-        {currentUser ? (
-          <>
-            <Link to="/news">
-              <Button type="text" icon={<ReadOutlined />} style={{ color: '#888' }}>
-                Dashboard
-              </Button>
-            </Link>
-            <Link to="/saved">
-              <Button type="text" icon={<BookOutlined />} style={{ color: '#888' }}>
-                Saved
-              </Button>
-            </Link>
-            <Link to="/preferences">
-              <Button type="text" icon={<SettingOutlined />} style={{ color: '#888' }}>
-                Preferences
-              </Button>
-            </Link>
-            <Link to="/profile">
-              <Button type="text" icon={<UserOutlined />} style={{ color: '#888' }}>
-                Profile
-              </Button>
-            </Link>
-            <Button
-              type="text"
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-              style={{ color: '#888' }}
-            >
-              Logout
-            </Button>
-          </>
-        ) : (
-          <>
-            <Link to="/login">
-              <Button type="text" style={{ color: '#fff' }}>
-                LOGIN
-              </Button>
-            </Link>
-            <Link to="/register">
+  return (
+    <>
+      <Header style={{
+        background: '#000',
+        borderBottom: '1px solid #222',
+        padding: '0 16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000,
+        height: 56
+      }}>
+        {/* Logo */}
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{
+            width: 28,
+            height: 28,
+            background: '#f5c518',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Text style={{
+              color: '#000',
+              fontWeight: 'bold',
+              fontSize: 16,
+              fontFamily: "'UnifrakturMaguntia', cursive"
+            }}>Y</Text>
+          </div>
+          <Text style={{
+            color: '#fff',
+            fontSize: 20,
+            fontWeight: 400,
+            fontFamily: "'UnifrakturMaguntia', cursive"
+          }}>
+            YorNews
+          </Text>
+        </Link>
+
+        {/* Desktop Navigation Links */}
+        <Space size="middle" className="desktop-nav" style={{ display: 'none' }}>
+          {currentUser ? (
+            <>
+              {navLinks.map(link => (
+                <Link key={link.to} to={link.to}>
+                  <Button type="text" icon={link.icon} style={{ color: '#888' }}>
+                    {link.label}
+                  </Button>
+                </Link>
+              ))}
               <Button
-                type="primary"
+                type="text"
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+                style={{ color: '#888' }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button type="text" style={{ color: '#fff' }}>
+                  LOGIN
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button
+                  type="primary"
+                  style={{
+                    background: '#f5c518',
+                    borderColor: '#f5c518',
+                    color: '#000',
+                    fontWeight: 500
+                  }}
+                >
+                  SUBSCRIBE
+                </Button>
+              </Link>
+            </>
+          )}
+        </Space>
+
+        {/* Mobile Menu Button */}
+        <Button
+          type="text"
+          icon={<MenuOutlined style={{ fontSize: 20 }} />}
+          onClick={() => setMobileMenuOpen(true)}
+          className="mobile-menu-btn"
+          style={{ color: '#fff', padding: 4 }}
+        />
+      </Header>
+
+      {/* Mobile Drawer Menu */}
+      <Drawer
+        title={
+          <Text style={{
+            color: '#fff',
+            fontFamily: "'UnifrakturMaguntia', cursive",
+            fontSize: 22
+          }}>
+            YorNews
+          </Text>
+        }
+        placement="right"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        width={280}
+        closeIcon={<CloseOutlined style={{ color: '#fff' }} />}
+        styles={{
+          header: { background: '#111', borderBottom: '1px solid #222' },
+          body: { background: '#111', padding: 0 }
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {currentUser ? (
+            <>
+              {navLinks.map(link => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    color: '#fff',
+                    padding: '16px 24px',
+                    borderBottom: '1px solid #222',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12
+                  }}
+                >
+                  {link.icon}
+                  {link.label}
+                </Link>
+              ))}
+              <div
+                onClick={handleLogout}
                 style={{
-                  background: '#f5c518',
-                  borderColor: '#f5c518',
-                  color: '#000',
+                  color: '#888',
+                  padding: '16px 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  cursor: 'pointer'
+                }}
+              >
+                <LogoutOutlined />
+                Logout
+              </div>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  color: '#fff',
+                  padding: '16px 24px',
+                  borderBottom: '1px solid #222'
+                }}
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  color: '#f5c518',
+                  padding: '16px 24px',
                   fontWeight: 500
                 }}
               >
-                SUBSCRIBE
-              </Button>
-            </Link>
-          </>
-        )}
-      </Space>
-    </Header>
+                Subscribe
+              </Link>
+            </>
+          )}
+        </div>
+      </Drawer>
+
+      <style>{`
+        @media (min-width: 769px) {
+          .desktop-nav {
+            display: flex !important;
+          }
+          .mobile-menu-btn {
+            display: none !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .desktop-nav {
+            display: none !important;
+          }
+          .mobile-menu-btn {
+            display: flex !important;
+          }
+        }
+      `}</style>
+    </>
   );
 }
 

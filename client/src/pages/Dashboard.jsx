@@ -170,43 +170,28 @@ function Dashboard() {
   return (
     <ConfigProvider theme={darkTheme}>
       <Layout style={{ minHeight: '100vh', background: '#000' }}>
-        <Content style={{ padding: '40px 60px', maxWidth: 1400, margin: '0 auto' }}>
+        <Content className="dashboard-content">
 
           {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 60 }}>
-            <Title level={1} style={{
-              color: '#fff',
-              fontSize: 42,
-              fontWeight: 400,
-              letterSpacing: 4,
-              marginBottom: 16
-            }}>
-              YOUR NEWS
+          <div className="dashboard-header">
+            <Title level={1} className="dashboard-title">
+              Your News
             </Title>
-            <Text style={{ color: '#888', fontSize: 16 }}>
+            <Text className="dashboard-subtitle">
               Personalized stories based on your{' '}
               <Link to="/preferences" style={{ color: '#f5c518', textDecoration: 'underline' }}>
                 preferences
               </Link>
             </Text>
-            <div style={{
-              width: 40,
-              height: 3,
-              background: '#f5c518',
-              margin: '20px auto 0'
-            }} />
+            <div className="dashboard-accent" />
           </div>
 
           {/* Action Buttons */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16, marginBottom: 40 }}>
+          <div className="dashboard-actions">
             <Link to="/saved">
               <Button
                 icon={<BookOutlined />}
-                style={{
-                  background: 'transparent',
-                  borderColor: '#333',
-                  color: '#fff'
-                }}
+                className="action-btn"
               >
                 Saved ({savedArticleUrls.size})
               </Button>
@@ -215,12 +200,173 @@ function Dashboard() {
               <Button
                 type="primary"
                 icon={<SettingOutlined />}
-                style={{ background: '#f5c518', borderColor: '#f5c518', color: '#000' }}
+                className="action-btn-primary"
               >
                 Preferences
               </Button>
             </Link>
           </div>
+
+          <style>{`
+            .dashboard-content {
+              padding: 20px 16px;
+              max-width: 1400px;
+              margin: 0 auto;
+            }
+            .dashboard-header {
+              text-align: center;
+              margin-bottom: 30px;
+            }
+            .dashboard-title {
+              color: #fff !important;
+              font-size: 28px !important;
+              font-weight: 400 !important;
+              font-family: 'UnifrakturMaguntia', cursive !important;
+              margin-bottom: 12px !important;
+            }
+            .dashboard-subtitle {
+              color: #888;
+              font-size: 14px;
+            }
+            .dashboard-accent {
+              width: 40px;
+              height: 3px;
+              background: #f5c518;
+              margin: 16px auto 0;
+            }
+            .dashboard-actions {
+              display: flex;
+              justify-content: center;
+              gap: 12px;
+              margin-bottom: 30px;
+              flex-wrap: wrap;
+            }
+            .action-btn {
+              background: transparent;
+              border-color: #333;
+              color: #fff;
+              font-size: 13px;
+            }
+            .action-btn-primary {
+              background: #f5c518;
+              border-color: #f5c518;
+              color: #000;
+              font-size: 13px;
+            }
+            .section-header {
+              display: flex;
+              align-items: center;
+              margin-bottom: 20px;
+            }
+            .section-bar {
+              width: 4px;
+              height: 20px;
+              background: #f5c518;
+              margin-right: 10px;
+            }
+            .side-article {
+              display: flex;
+              gap: 12px;
+              margin-bottom: 16px;
+            }
+            .side-article-img {
+              width: 80px;
+              height: 56px;
+              object-fit: cover;
+              flex-shrink: 0;
+            }
+            .side-article-category {
+              color: #f5c518;
+              font-size: 10px;
+              letter-spacing: 1px;
+              display: block;
+              margin-bottom: 4px;
+            }
+            .side-article-title {
+              color: #fff;
+              font-size: 13px;
+              line-height: 1.3;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              word-break: break-word;
+            }
+            .featured-overlay {
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              padding: 40px 20px 20px;
+              background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            }
+            .featured-title {
+              color: #fff !important;
+              margin: 0 0 12px !important;
+              font-size: 20px !important;
+              font-weight: 400 !important;
+              word-break: break-word;
+            }
+            .grid-card-title {
+              color: #fff;
+              font-size: 13px;
+              line-height: 1.4;
+              display: -webkit-box;
+              -webkit-line-clamp: 3;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              word-break: break-word;
+            }
+            .grid-card-summary {
+              color: #666;
+              font-size: 11px;
+              margin-top: 8px;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+            @media (min-width: 769px) {
+              .dashboard-content {
+                padding: 40px 60px;
+              }
+              .dashboard-header {
+                margin-bottom: 50px;
+              }
+              .dashboard-title {
+                font-size: 38px !important;
+              }
+              .dashboard-subtitle {
+                font-size: 16px;
+              }
+              .dashboard-actions {
+                justify-content: flex-end;
+                margin-bottom: 40px;
+              }
+              .action-btn, .action-btn-primary {
+                font-size: 14px;
+              }
+              .side-article-img {
+                width: 100px;
+                height: 70px;
+              }
+              .side-article-title {
+                font-size: 14px;
+              }
+              .featured-overlay {
+                padding: 60px 30px 30px;
+              }
+              .featured-title {
+                font-size: 28px !important;
+              }
+              .grid-card-title {
+                font-size: 14px;
+              }
+              .grid-card-summary {
+                font-size: 12px;
+              }
+            }
+          `}</style>
 
           {/* Loading State */}
           {loading && (
@@ -278,26 +424,19 @@ function Dashboard() {
           {articles.length > 0 && !loading && (
             <>
               {/* Section Header */}
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 30 }}>
-                <div style={{ width: 4, height: 24, background: '#f5c518', marginRight: 12 }} />
-                <Title level={4} style={{ color: '#fff', margin: 0, letterSpacing: 2 }}>
+              <div className="section-header">
+                <div className="section-bar" />
+                <Title level={4} style={{ color: '#fff', margin: 0, letterSpacing: 1, fontSize: 14 }}>
                   TOP PICKS FOR YOU
                 </Title>
               </div>
 
               {/* Featured Layout */}
-              <Row gutter={[24, 24]}>
+              <Row gutter={[16, 16]}>
                 {/* Left Side - Small Cards */}
                 <Col xs={24} md={8}>
                   {sideArticles.map((article, index) => (
-                    <div
-                      key={article.url || index}
-                      style={{
-                        display: 'flex',
-                        gap: 16,
-                        marginBottom: 24,
-                      }}
-                    >
+                    <div key={article.url || index} className="side-article">
                       <a
                         href={article.url}
                         target="_blank"
@@ -306,23 +445,12 @@ function Dashboard() {
                         <img
                           src={article.urlToImage || 'https://placehold.co/100x70/111/333?text=News'}
                           alt={article.title}
-                          style={{
-                            width: 100,
-                            height: 70,
-                            objectFit: 'cover',
-                            flexShrink: 0
-                          }}
+                          className="side-article-img"
                           onError={(e) => { e.target.src = 'https://placehold.co/100x70/111/333?text=News'; }}
                         />
                       </a>
-                      <div style={{ flex: 1 }}>
-                        <Text style={{
-                          color: '#f5c518',
-                          fontSize: 11,
-                          letterSpacing: 1,
-                          display: 'block',
-                          marginBottom: 4
-                        }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <Text className="side-article-category">
                           {getCategory(article)}
                         </Text>
                         <a
@@ -331,15 +459,7 @@ function Dashboard() {
                           rel="noopener noreferrer"
                           style={{ textDecoration: 'none' }}
                         >
-                          <Text style={{
-                            color: '#fff',
-                            fontSize: 14,
-                            lineHeight: 1.4,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden'
-                          }}>
+                          <Text className="side-article-title">
                             {article.title}
                           </Text>
                         </a>
@@ -353,7 +473,8 @@ function Dashboard() {
                             color: savedArticleUrls.has(article.url) ? '#f5c518' : '#666',
                             padding: 0,
                             marginTop: 4,
-                            height: 'auto'
+                            height: 'auto',
+                            fontSize: 12
                           }}
                         >
                           {savedArticleUrls.has(article.url) ? 'Saved' : 'Save'}
@@ -366,7 +487,7 @@ function Dashboard() {
                 {/* Right Side - Featured Card */}
                 <Col xs={24} md={16}>
                   {featuredArticle && (
-                    <div style={{ position: 'relative', height: '100%', minHeight: 350 }}>
+                    <div style={{ position: 'relative', height: '100%', minHeight: 250 }}>
                       <a
                         href={featuredArticle.url}
                         target="_blank"
@@ -378,25 +499,19 @@ function Dashboard() {
                           style={{
                             width: '100%',
                             height: '100%',
-                            minHeight: 350,
+                            minHeight: 250,
                             objectFit: 'cover'
                           }}
                           onError={(e) => { e.target.src = 'https://placehold.co/800x400/111/333?text=Featured'; }}
                         />
                       </a>
-                      <div style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        padding: '60px 30px 30px',
-                        background: 'linear-gradient(transparent, rgba(0,0,0,0.9))'
-                      }}>
+                      <div className="featured-overlay">
                         <Tag style={{
                           background: 'transparent',
                           border: '1px solid #fff',
                           color: '#fff',
-                          marginBottom: 12
+                          marginBottom: 10,
+                          fontSize: 10
                         }}>
                           {getCategory(featuredArticle)}
                         </Tag>
@@ -406,16 +521,11 @@ function Dashboard() {
                           rel="noopener noreferrer"
                           style={{ textDecoration: 'none' }}
                         >
-                          <Title level={2} style={{
-                            color: '#fff',
-                            margin: '0 0 16px',
-                            fontSize: 28,
-                            fontWeight: 400
-                          }}>
+                          <Title level={2} className="featured-title">
                             {featuredArticle.title}
                           </Title>
                         </a>
-                        <div style={{ display: 'flex', gap: 16 }}>
+                        <div style={{ display: 'flex', gap: 12 }}>
                           <a
                             href={featuredArticle.url}
                             target="_blank"
@@ -428,7 +538,7 @@ function Dashboard() {
                                 border: 'none',
                                 color: '#fff',
                                 padding: 0,
-                                fontSize: 14
+                                fontSize: 12
                               }}
                             >
                               READ
@@ -443,7 +553,7 @@ function Dashboard() {
                               border: 'none',
                               color: savedArticleUrls.has(featuredArticle.url) ? '#f5c518' : '#fff',
                               padding: 0,
-                              fontSize: 14
+                              fontSize: 12
                             }}
                           >
                             {savedArticleUrls.has(featuredArticle.url) ? 'SAVED' : 'SAVE'}
@@ -458,21 +568,16 @@ function Dashboard() {
               {/* More Stories Grid */}
               {gridArticles.length > 0 && (
                 <>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    marginTop: 60,
-                    marginBottom: 30
-                  }}>
-                    <div style={{ width: 4, height: 24, background: '#f5c518', marginRight: 12 }} />
-                    <Title level={4} style={{ color: '#fff', margin: 0, letterSpacing: 2 }}>
+                  <div className="section-header" style={{ marginTop: 40 }}>
+                    <div className="section-bar" />
+                    <Title level={4} style={{ color: '#fff', margin: 0, letterSpacing: 1, fontSize: 14 }}>
                       MORE STORIES
                     </Title>
                   </div>
 
-                  <Row gutter={[24, 24]}>
+                  <Row gutter={[12, 12]}>
                     {gridArticles.map((article, index) => (
-                      <Col xs={24} sm={12} md={8} lg={6} key={article.url || index}>
+                      <Col xs={12} sm={12} md={8} lg={6} key={article.url || index}>
                         <Card
                           hoverable
                           cover={
@@ -484,7 +589,7 @@ function Dashboard() {
                               <img
                                 alt={article.title}
                                 src={article.urlToImage || 'https://placehold.co/300x180/111/333?text=News'}
-                                style={{ height: 180, objectFit: 'cover', width: '100%' }}
+                                style={{ height: 120, objectFit: 'cover', width: '100%' }}
                                 onError={(e) => { e.target.src = 'https://placehold.co/300x180/111/333?text=News'; }}
                               />
                             </a>
@@ -493,14 +598,14 @@ function Dashboard() {
                             background: '#111',
                             border: 'none'
                           }}
-                          styles={{ body: { padding: 16 } }}
+                          styles={{ body: { padding: 10 } }}
                         >
                           <Text style={{
                             color: '#f5c518',
-                            fontSize: 11,
+                            fontSize: 9,
                             letterSpacing: 1,
                             display: 'block',
-                            marginBottom: 8
+                            marginBottom: 6
                           }}>
                             {getCategory(article)}
                           </Text>
@@ -510,38 +615,23 @@ function Dashboard() {
                             rel="noopener noreferrer"
                             style={{ textDecoration: 'none' }}
                           >
-                            <Text style={{
-                              color: '#fff',
-                              fontSize: 14,
-                              lineHeight: 1.5,
-                              display: '-webkit-box',
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden'
-                            }}>
+                            <Text className="grid-card-title">
                               {article.title}
                             </Text>
                           </a>
                           {article.summary && article.summary !== article.description && (
-                            <Text style={{
-                              color: '#666',
-                              fontSize: 12,
-                              marginTop: 8,
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden'
-                            }}>
+                            <Text className="grid-card-summary">
                               {article.summary}
                             </Text>
                           )}
-                          <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+                          <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
                             <Button
                               type="text"
+                              size="small"
                               icon={savedArticleUrls.has(article.url) ? <HeartFilled style={{ color: '#f5c518' }} /> : <HeartOutlined />}
                               onClick={() => handleSaveArticle(article)}
                               disabled={savedArticleUrls.has(article.url)}
-                              style={{ color: savedArticleUrls.has(article.url) ? '#f5c518' : '#888' }}
+                              style={{ color: savedArticleUrls.has(article.url) ? '#f5c518' : '#888', fontSize: 11, padding: '0 4px' }}
                             >
                               {savedArticleUrls.has(article.url) ? 'Saved' : 'Save'}
                             </Button>
@@ -554,8 +644,8 @@ function Dashboard() {
               )}
 
               {/* Article Count */}
-              <div style={{ textAlign: 'center', marginTop: 60, color: '#444' }}>
-                <Text>Showing {articles.length} articles</Text>
+              <div style={{ textAlign: 'center', marginTop: 40, color: '#444' }}>
+                <Text style={{ fontSize: 12 }}>Showing {articles.length} articles</Text>
               </div>
             </>
           )}

@@ -100,21 +100,23 @@ function Preferences() {
   }
 
   return (
-    <Layout style={{ background: '#000', minHeight: 'calc(100vh - 64px)' }}>
-      <Content style={{ padding: '60px', maxWidth: 700, margin: '0 auto', width: '100%' }}>
+    <Layout style={{ background: '#000', minHeight: 'calc(100vh - 56px)' }}>
+      <Content className="preferences-content">
         <Card style={{
           background: '#111',
           border: '1px solid #222'
-        }}>
+        }}
+        styles={{ body: { padding: '20px 16px' } }}
+        >
           {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <Title level={2} style={{ color: '#fff', marginBottom: 8 }}>
+          <div className="preferences-header">
+            <Title level={2} className="preferences-title">
               Set Your News Preferences
             </Title>
-            <Text style={{ color: '#666' }}>
-              Tell us what kind of news you're interested in using natural language
+            <Text className="preferences-subtitle">
+              Tell us what kind of news you're interested in
             </Text>
-            <div style={{ width: 40, height: 3, background: '#f5c518', margin: '20px auto 0' }} />
+            <div className="preferences-accent" />
           </div>
 
           {error && (
@@ -122,7 +124,7 @@ function Preferences() {
               description={error}
               type="error"
               showIcon
-              style={{ marginBottom: 24 }}
+              style={{ marginBottom: 20 }}
             />
           )}
 
@@ -131,29 +133,30 @@ function Preferences() {
               description={success}
               type="success"
               showIcon
-              style={{ marginBottom: 24 }}
+              style={{ marginBottom: 20 }}
             />
           )}
 
           {/* Form */}
-          <div style={{ marginBottom: 24 }}>
-            <Text style={{ color: '#888', display: 'block', marginBottom: 12 }}>
+          <div style={{ marginBottom: 20 }}>
+            <Text style={{ color: '#888', display: 'block', marginBottom: 10, fontSize: 13 }}>
               What news are you interested in?
             </Text>
             <TextArea
               value={preferenceText}
               onChange={(e) => setPreferenceText(e.target.value)}
-              placeholder="Example: I want to read about AI, startups, and climate technology from the last 7 days"
-              rows={6}
+              placeholder="Example: AI, startups, and climate technology from the last 7 days"
+              rows={5}
               disabled={submitting}
               style={{
                 background: '#1a1a1a',
                 border: '1px solid #333',
                 color: '#fff',
-                resize: 'none'
+                resize: 'none',
+                fontSize: 14
               }}
             />
-            <Text style={{ color: '#444', fontSize: 12, marginTop: 8, display: 'block' }}>
+            <Text style={{ color: '#444', fontSize: 11, marginTop: 6, display: 'block' }}>
               Be specific about topics, categories, and timeframe
             </Text>
           </div>
@@ -169,8 +172,9 @@ function Preferences() {
               background: '#f5c518',
               borderColor: '#f5c518',
               color: '#000',
-              height: 48,
-              fontWeight: 500
+              height: 44,
+              fontWeight: 500,
+              fontSize: 14
             }}
           >
             {submitting ? 'Saving...' : 'Save Preferences'}
@@ -178,27 +182,67 @@ function Preferences() {
 
           {/* Current Preferences */}
           {currentPreferences && currentPreferences.raw_input && (
-            <div style={{
-              marginTop: 40,
-              padding: 20,
-              background: '#0a0a0a',
-              border: '1px solid #222'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{ width: 3, height: 16, background: '#f5c518', marginRight: 10 }} />
-                <Text style={{ color: '#888', fontSize: 12, letterSpacing: 1 }}>
+            <div className="current-prefs">
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+                <div style={{ width: 3, height: 14, background: '#f5c518', marginRight: 8 }} />
+                <Text style={{ color: '#888', fontSize: 11, letterSpacing: 1 }}>
                   CURRENT PREFERENCES
                 </Text>
               </div>
-              <Paragraph style={{ color: '#fff', marginBottom: 8 }}>
+              <Paragraph style={{ color: '#fff', marginBottom: 6, fontSize: 13, wordBreak: 'break-word' }}>
                 {currentPreferences.raw_input}
               </Paragraph>
-              <Text style={{ color: '#444', fontSize: 12 }}>
+              <Text style={{ color: '#444', fontSize: 11 }}>
                 Last updated: {new Date(currentPreferences.parsed_at).toLocaleDateString()}
               </Text>
             </div>
           )}
         </Card>
+
+        <style>{`
+          .preferences-content {
+            padding: 20px 16px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+          }
+          .preferences-header {
+            text-align: center;
+            margin-bottom: 24px;
+          }
+          .preferences-title {
+            color: #fff !important;
+            margin-bottom: 6px !important;
+            font-size: 20px !important;
+          }
+          .preferences-subtitle {
+            color: #666;
+            font-size: 13px;
+          }
+          .preferences-accent {
+            width: 40px;
+            height: 3px;
+            background: #f5c518;
+            margin: 16px auto 0;
+          }
+          .current-prefs {
+            margin-top: 30px;
+            padding: 16px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+          }
+          @media (min-width: 769px) {
+            .preferences-content {
+              padding: 40px 20px;
+            }
+            .preferences-title {
+              font-size: 24px !important;
+            }
+            .preferences-subtitle {
+              font-size: 14px;
+            }
+          }
+        `}</style>
       </Content>
     </Layout>
   );

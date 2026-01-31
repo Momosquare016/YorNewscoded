@@ -37,25 +37,26 @@ function Login() {
   }
 
   return (
-    <Layout style={{ background: '#000', minHeight: 'calc(100vh - 64px)' }}>
+    <Layout style={{ background: '#000', minHeight: 'calc(100vh - 56px)' }}>
       <Content style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '60px 20px'
+        padding: '30px 16px'
       }}>
         <Card style={{
           background: '#111',
           border: '1px solid #222',
           width: '100%',
-          maxWidth: 420,
-          padding: '20px'
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <Title level={2} style={{ color: '#fff', marginBottom: 8 }}>
+          maxWidth: 400
+        }}
+        styles={{ body: { padding: '24px 16px' } }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <Title level={2} style={{ color: '#fff', marginBottom: 6, fontSize: 22 }}>
               Welcome Back
             </Title>
-            <Text style={{ color: '#666' }}>Log in to your account</Text>
+            <Text style={{ color: '#666', fontSize: 13 }}>Log in to your account</Text>
           </div>
 
           {error && (
@@ -118,8 +119,9 @@ function Login() {
                   background: '#f5c518',
                   borderColor: '#f5c518',
                   color: '#000',
-                  height: 48,
-                  fontWeight: 500
+                  height: 44,
+                  fontWeight: 500,
+                  fontSize: 14
                 }}
               >
                 {loading ? 'Logging in...' : 'Log In'}
@@ -128,7 +130,7 @@ function Login() {
           </Form>
 
           <div style={{ textAlign: 'center' }}>
-            <Text style={{ color: '#666' }}>
+            <Text style={{ color: '#666', fontSize: 13 }}>
               Don't have an account?{' '}
               <Link to="/register" style={{ color: '#f5c518' }}>
                 Sign up

@@ -40,7 +40,7 @@ function Profile() {
 
   if (loading) {
     return (
-      <Layout style={{ background: '#000', minHeight: 'calc(100vh - 64px)' }}>
+      <Layout style={{ background: '#000', minHeight: 'calc(100vh - 56px)' }}>
         <Content style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Spin size="large" />
         </Content>
@@ -49,26 +49,28 @@ function Profile() {
   }
 
   return (
-    <Layout style={{ background: '#000', minHeight: 'calc(100vh - 64px)' }}>
-      <Content style={{ padding: '60px', maxWidth: 800, margin: '0 auto', width: '100%' }}>
+    <Layout style={{ background: '#000', minHeight: 'calc(100vh - 56px)' }}>
+      <Content className="profile-content">
         <Card style={{
           background: '#111',
           border: '1px solid #222'
-        }}>
+        }}
+        styles={{ body: { padding: '24px 16px' } }}
+        >
           {/* Profile Header */}
-          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <div style={{ textAlign: 'center', marginBottom: 30 }}>
             <Avatar
-              size={100}
+              size={80}
               style={{
                 background: '#f5c518',
                 color: '#000',
-                fontSize: 40,
-                marginBottom: 20
+                fontSize: 32,
+                marginBottom: 16
               }}
             >
               {currentUser?.email?.charAt(0).toUpperCase()}
             </Avatar>
-            <Title level={2} style={{ color: '#fff', marginBottom: 8 }}>
+            <Title level={2} style={{ color: '#fff', marginBottom: 6, fontSize: 22 }}>
               Profile
             </Title>
             <div style={{ width: 40, height: 3, background: '#f5c518', margin: '0 auto' }} />
@@ -77,9 +79,9 @@ function Profile() {
           {/* Profile Info */}
           <Descriptions
             column={1}
-            labelStyle={{ color: '#666', width: 150 }}
-            contentStyle={{ color: '#fff' }}
-            style={{ marginBottom: 40 }}
+            labelStyle={{ color: '#666', width: 100, fontSize: 13 }}
+            contentStyle={{ color: '#fff', fontSize: 13, wordBreak: 'break-word' }}
+            style={{ marginBottom: 30 }}
           >
             <Descriptions.Item label="Email">
               {currentUser?.email}
@@ -97,7 +99,7 @@ function Profile() {
           </Descriptions>
 
           {/* Actions */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <Link to="/preferences">
               <Button
                 icon={<SettingOutlined />}
@@ -107,7 +109,8 @@ function Profile() {
                   background: '#f5c518',
                   borderColor: '#f5c518',
                   color: '#000',
-                  height: 48
+                  height: 44,
+                  fontSize: 14
                 }}
               >
                 Edit Preferences
@@ -122,7 +125,8 @@ function Profile() {
                   background: 'transparent',
                   borderColor: '#333',
                   color: '#fff',
-                  height: 48
+                  height: 44,
+                  fontSize: 14
                 }}
               >
                 View Saved Articles
@@ -134,12 +138,26 @@ function Profile() {
               block
               size="large"
               danger
-              style={{ height: 48 }}
+              style={{ height: 44, fontSize: 14 }}
             >
               Logout
             </Button>
           </div>
         </Card>
+
+        <style>{`
+          .profile-content {
+            padding: 20px 16px;
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+          }
+          @media (min-width: 769px) {
+            .profile-content {
+              padding: 40px 20px;
+            }
+          }
+        `}</style>
       </Content>
     </Layout>
   );
