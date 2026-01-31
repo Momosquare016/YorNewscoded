@@ -1,5 +1,5 @@
 const db = require('../db');
-const { parsePreferences } = require('../services/openai');
+const { parsePreferences } = require('../services/groq');
 
 // GET user preferences
 async function getPreferences(req, res) {
@@ -36,9 +36,9 @@ async function updatePreferences(req, res) {
       return res.status(400).json({ error: 'preferenceText is required' });
     }
 
-    console.log('Parsing preferences with OpenAI:', preferenceText);
+    console.log('Parsing preferences with Groq AI:', preferenceText);
 
-    // Use OpenAI to parse natural language into structured format
+    // Use Groq AI to parse natural language into structured format
     const parsedPreferences = await parsePreferences(preferenceText);
 
     console.log('Parsed preferences:', parsedPreferences);

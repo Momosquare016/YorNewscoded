@@ -10,7 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 async function apiCall(endpoint, options = {}) {
   try {
     const token = getAuthToken();
-    
+
     const response = await fetch(`${API_URL}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -20,7 +20,15 @@ async function apiCall(endpoint, options = {}) {
       ...options,
     });
 
-    const data = await response.json();
+    // Handle response - check content type before parsing JSON
+    let data;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      data = { error: text || 'Server returned an invalid response' };
+    }
 
     if (!response.ok) {
       throw new Error(data.error || 'API call failed');

@@ -45,8 +45,17 @@ export function AuthProvider({ children }) {
         }),
       });
 
+      // Handle response - check content type before parsing JSON
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        data = { error: text || 'Server returned an invalid response' };
+      }
+
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || 'Failed to register in database');
       }
 
