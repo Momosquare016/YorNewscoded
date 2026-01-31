@@ -78,13 +78,22 @@ export const api = {
   }),
 
   // News endpoints
-  getNews: (refresh = false, preferences = null) => {
-    // If we have cached preferences, send them to avoid database replication lag
+  getNews: async (refresh = false, preferences = null) => {
+    // If we have cached preferences, try POST first (avoids DB replication lag)
     if (preferences) {
-      return apiCall('/api/news', {
-        method: 'POST',
-        body: JSON.stringify({ preferences, refresh }),
-      });
+      try {
+        return await apiCall('/api/news', {
+          method: 'POST',
+          body: JSON.stringify({ preferences, refresh }),
+        });
+      } catch (error) {
+        // If POST fails (server not updated), fallback to GET
+        if (error.message?.includes('not found') || error.message?.includes('404')) {
+          console.warn('POST /api/news not available, falling back to GET');
+          return apiCall(`/api/news${refresh ? '?refresh=true' : ''}`);
+        }
+        throw error;
+      }
     }
     return apiCall(`/api/news${refresh ? '?refresh=true' : ''}`);
   },
