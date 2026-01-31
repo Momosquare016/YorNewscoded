@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Layout, Typography, Row, Col, Card, Tag, Button, Spin, Alert, ConfigProvider, theme } from 'antd';
 import { SettingOutlined, BookOutlined, ReadOutlined } from '@ant-design/icons';
 import { api } from '../utils/api';
@@ -13,6 +13,7 @@ function Dashboard() {
   const [error, setError] = useState('');
   const [rateLimited, setRateLimited] = useState(false);
   const [savedArticleUrls, setSavedArticleUrls] = useState(new Set());
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchNews();
@@ -30,6 +31,12 @@ function Dashboard() {
       if (data.rateLimited) {
         setRateLimited(true);
         setError(data.message || 'Daily limit reached. Please try again tomorrow!');
+        return;
+      }
+
+      // If no preferences set, redirect to preferences page
+      if (data.message && data.message.includes('preferences') && data.articles.length === 0) {
+        navigate('/preferences');
         return;
       }
 
@@ -111,13 +118,13 @@ function Dashboard() {
               letterSpacing: 4,
               marginBottom: 16
             }}>
-              LATEST STORIES
+              YOUR NEWS
             </Title>
             <Text style={{ color: '#888', fontSize: 16 }}>
+              Personalized stories based on your{' '}
               <Link to="/preferences" style={{ color: '#f5c518', textDecoration: 'underline' }}>
-                Set preferences
+                preferences
               </Link>
-              {' '}for personalized news from YorNews
             </Text>
             <div style={{
               width: 40,
@@ -173,8 +180,8 @@ function Dashboard() {
             />
           )}
 
-          {/* Error */}
-          {error && !rateLimited && (
+          {/* Error - only show for actual errors, not missing preferences */}
+          {error && !rateLimited && !error.includes('preferences') && (
             <Alert
               message={error.includes('connect') ? 'Connection Error' : 'Error'}
               description={error}
@@ -182,16 +189,9 @@ function Dashboard() {
               showIcon
               style={{ marginBottom: 40 }}
               action={
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {error.includes('preferences') && (
-                    <Link to="/preferences">
-                      <Button size="small" type="primary">Set Preferences</Button>
-                    </Link>
-                  )}
-                  {error.includes('connect') && (
-                    <Button size="small" onClick={fetchNews}>Retry</Button>
-                  )}
-                </div>
+                error.includes('connect') && (
+                  <Button size="small" onClick={fetchNews}>Retry</Button>
+                )
               }
             />
           )}
@@ -199,12 +199,12 @@ function Dashboard() {
           {/* Empty State */}
           {articles.length === 0 && !error && !loading && (
             <div style={{ textAlign: 'center', padding: 100 }}>
-              <Title level={3} style={{ color: '#fff' }}>No news available</Title>
-              <Text style={{ color: '#888' }}>Set your preferences to get personalized news</Text>
+              <Title level={3} style={{ color: '#fff' }}>No articles found</Title>
+              <Text style={{ color: '#888' }}>Try adjusting your preferences for different results</Text>
               <div style={{ marginTop: 20 }}>
                 <Link to="/preferences">
                   <Button type="primary" style={{ background: '#f5c518', borderColor: '#f5c518', color: '#000' }}>
-                    Set Preferences
+                    Update Preferences
                   </Button>
                 </Link>
               </div>
@@ -218,7 +218,7 @@ function Dashboard() {
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: 30 }}>
                 <div style={{ width: 4, height: 24, background: '#f5c518', marginRight: 12 }} />
                 <Title level={4} style={{ color: '#fff', margin: 0, letterSpacing: 2 }}>
-                  TODAY'S PICKS
+                  TOP PICKS FOR YOU
                 </Title>
               </div>
 
