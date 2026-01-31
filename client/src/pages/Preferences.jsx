@@ -30,8 +30,10 @@ function Preferences() {
       if (data.preferences?.raw_input) {
         setPreferenceText(data.preferences.raw_input);
       }
+      setError('');
     } catch (err) {
       console.error('Failed to fetch preferences:', err);
+      setError(err.message || 'Failed to fetch preferences');
     } finally {
       setLoading(false);
     }

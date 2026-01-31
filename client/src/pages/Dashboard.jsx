@@ -176,17 +176,22 @@ function Dashboard() {
           {/* Error */}
           {error && !rateLimited && (
             <Alert
-              message="Error"
+              message={error.includes('connect') ? 'Connection Error' : 'Error'}
               description={error}
               type="error"
               showIcon
               style={{ marginBottom: 40 }}
               action={
-                error.includes('preferences') && (
-                  <Link to="/preferences">
-                    <Button size="small" type="primary">Set Preferences</Button>
-                  </Link>
-                )
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {error.includes('preferences') && (
+                    <Link to="/preferences">
+                      <Button size="small" type="primary">Set Preferences</Button>
+                    </Link>
+                  )}
+                  {error.includes('connect') && (
+                    <Button size="small" onClick={fetchNews}>Retry</Button>
+                  )}
+                </div>
               }
             />
           )}

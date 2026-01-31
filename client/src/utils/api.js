@@ -31,12 +31,30 @@ async function apiCall(endpoint, options = {}) {
     }
 
     if (!response.ok) {
-      throw new Error(data.error || 'API call failed');
+      // Provide user-friendly error messages based on status code
+      if (response.status === 401) {
+        throw new Error('Session expired. Please log in again.');
+      } else if (response.status === 403) {
+        throw new Error('You don\'t have permission to access this resource.');
+      } else if (response.status === 404) {
+        throw new Error('The requested resource was not found.');
+      } else if (response.status === 429) {
+        throw new Error('Too many requests. Please wait a moment and try again.');
+      } else if (response.status >= 500) {
+        throw new Error('Server error. Please try again later.');
+      }
+      throw new Error(data.error || 'Something went wrong. Please try again.');
     }
 
     return data;
   } catch (error) {
     console.error('API Error:', error);
+
+    // Handle network errors with user-friendly messages
+    if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+      throw new Error('Unable to connect to the server. Please check your internet connection or try again later.');
+    }
+
     throw error;
   }
 }
