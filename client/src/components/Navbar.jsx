@@ -64,7 +64,8 @@ function Navbar() {
             fontSize: 18,
             fontWeight: 400,
             letterSpacing: 2,
-            fontFamily: "'Georgia', serif"
+            fontFamily: "'Georgia', serif",
+            whiteSpace: 'nowrap'
           }}>
             YORNEWS
           </Text>
