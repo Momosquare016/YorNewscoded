@@ -27,7 +27,17 @@ function Register() {
       await signup(values.email, values.password);
       navigate('/preferences');
     } catch (err) {
-      setError(err.message || 'Failed to create account');
+      if (err.code === 'auth/email-already-in-use') {
+        setError('An account with this email already exists');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password is too weak. Please use at least 6 characters');
+      } else if (err.message?.includes('Failed to fetch')) {
+        setError('Unable to connect to server. Please try again later.');
+      } else {
+        setError(err.message || 'Failed to create account');
+      }
     } finally {
       setLoading(false);
     }
