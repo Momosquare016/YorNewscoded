@@ -17,36 +17,35 @@ function Dashboard() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Handle prefetched articles or new preferences from navigation
   useEffect(() => {
-    if (location.state?.prefetchedArticles) {
-      setArticles(location.state.prefetchedArticles);
+    // Check for prefetched articles from Preferences page (via sessionStorage)
+    const prefetchedData = sessionStorage.getItem('prefetchedArticles');
+    if (prefetchedData) {
+      sessionStorage.removeItem('prefetchedArticles');
+      const articles = JSON.parse(prefetchedData);
+      setArticles(articles);
       setLoading(false);
       localStorage.removeItem('lastSavedPreferences');
-      window.history.replaceState({}, document.title);
       fetchSavedArticles();
-    } else if (location.state?.newPreferences) {
-      const prefs = location.state.newPreferences;
+      return;
+    }
+
+    // Check for new preferences from Preferences page (via sessionStorage)
+    const newPrefsData = sessionStorage.getItem('newPreferences');
+    if (newPrefsData) {
+      sessionStorage.removeItem('newPreferences');
+      const prefs = JSON.parse(newPrefsData);
       setArticles([]);
-      setLoading(true);
-      window.history.replaceState({}, document.title);
       fetchNewsWithPreferences(prefs);
       fetchSavedArticles();
-    }
-  }, [location.state]);
-
-  // Initial load (only when no state from navigation)
-  useEffect(() => {
-    if (location.state?.prefetchedArticles || location.state?.newPreferences) {
-      return; // Skip - handled by the other useEffect
+      return;
     }
 
-    // Check if we need to force refresh (e.g., after updating preferences)
+    // Check if we need to force refresh
     const urlRefresh = searchParams.get('refresh') === 'true';
     const storageRefresh = sessionStorage.getItem('refreshNews') === 'true';
     const shouldRefresh = urlRefresh || storageRefresh;
 
-    // Clear the flags immediately
     if (storageRefresh) {
       sessionStorage.removeItem('refreshNews');
     }

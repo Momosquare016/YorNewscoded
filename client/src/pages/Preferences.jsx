@@ -70,26 +70,18 @@ function Preferences() {
 
         const newsData = await api.getNews(true, savedPreferences);
         if (newsData.articles && newsData.articles.length > 0) {
-          // News fetched successfully, pass data to Dashboard via navigation state
-          navigate('/news', {
-            state: {
-              prefetchedArticles: newsData.articles,
-              preferencesUsed: savedPreferences
-            }
-          });
+          // Store prefetched articles in sessionStorage for Dashboard
+          sessionStorage.setItem('prefetchedArticles', JSON.stringify(newsData.articles));
+          window.location.href = '/news';
           return;
         }
       } catch (newsErr) {
         console.log('News fetch with preferences failed:', newsErr.message);
       }
 
-      // Fallback: navigate with preferences in state so Dashboard can use them
-      navigate('/news', {
-        state: {
-          forceRefresh: true,
-          newPreferences: savedPreferences
-        }
-      });
+      // Fallback: signal Dashboard to refresh with new preferences
+      sessionStorage.setItem('newPreferences', JSON.stringify(savedPreferences));
+      window.location.href = '/news';
     } catch (err) {
       setError(err.message || 'Failed to save preferences');
     } finally {
