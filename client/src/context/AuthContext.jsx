@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
   async function signup(email, password) {
     try {
       setError(null);
-      
+
       // Create user in Firebase
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -36,30 +36,29 @@ export function AuthProvider({ children }) {
       // Get Firebase ID token
       const idToken = await user.getIdToken();
 
-      // Register user in our backend database
-      const response = await fetch(`${API_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firebase_uid: user.uid,
-          email: user.email,
-        }),
-      });
+      // Store token in localStorage immediately (for API calls)
+      localStorage.setItem('authToken', idToken);
 
-      // Handle response - check content type before parsing JSON
-      let data;
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        data = { error: text || 'Server returned an invalid response' };
-      }
+      // Register user in our backend database (non-blocking)
+      // If this fails, user can still use the app since Firebase auth worked
+      try {
+        const response = await fetch(`${API_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            firebase_uid: user.uid,
+            email: user.email,
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to register in database');
+        if (!response.ok) {
+          console.warn('Backend registration failed, but Firebase user created');
+        }
+      } catch (backendErr) {
+        // Log but don't fail - Firebase user was created successfully
+        console.warn('Backend registration error:', backendErr.message);
       }
 
       return { user, idToken };
