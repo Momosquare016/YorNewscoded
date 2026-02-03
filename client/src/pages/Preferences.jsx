@@ -50,30 +50,14 @@ function Preferences() {
 
     try {
       setSubmitting(true);
-      const result = await api.updatePreferences(preferenceText);
-      setSuccess('Preferences saved! Fetching your personalized news...');
+      await api.updatePreferences(preferenceText);
+      setSuccess('Preferences saved! Loading your news...');
 
-      // Store preferences locally with the full result for immediate use
-      const savedPreferences = result.preferences;
-      if (savedPreferences) {
-        localStorage.setItem('lastSavedPreferences', JSON.stringify({
-          preferences: savedPreferences,
-          savedAt: Date.now()
-        }));
-      }
+      // Clear any old cached data
+      localStorage.removeItem('lastSavedPreferences');
 
-      // Fetch news immediately using the new preferences (bypasses DB replication lag)
-      // Pass preferences directly to the API to ensure we get fresh content
-      try {
-        // Small delay to let server process
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        await api.getNews(true, savedPreferences);
-      } catch (newsErr) {
-        console.log('News prefetch failed:', newsErr.message);
-      }
-
-      // Force full page reload to show new preferences
+      // Small delay to let server process, then reload
+      await new Promise(resolve => setTimeout(resolve, 500));
       window.location.href = '/news';
     } catch (err) {
       setError(err.message || 'Failed to save preferences');

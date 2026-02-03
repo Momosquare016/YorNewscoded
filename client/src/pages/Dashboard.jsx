@@ -59,41 +59,8 @@ function Dashboard() {
       setError('');
       setRateLimited(false);
 
-      // Check if we have recently saved preferences that need to sync
-      const savedPrefsData = localStorage.getItem('lastSavedPreferences');
-      let prefsToUse = null;
-
-      if (savedPrefsData) {
-        const { preferences, savedAt } = JSON.parse(savedPrefsData);
-        const ageInSeconds = (Date.now() - savedAt) / 1000;
-        // Only use cached preferences if saved in the last 60 seconds
-        if (ageInSeconds < 60) {
-          prefsToUse = preferences;
-        } else {
-          // Clear old saved preferences
-          localStorage.removeItem('lastSavedPreferences');
-        }
-      }
-
-      // If we have recent preferences, use them directly to bypass DB lag
-      if (prefsToUse) {
-        console.log('Using cached preferences for news fetch');
-        const data = await api.getNews(true, prefsToUse);
-
-        if (data.rateLimited) {
-          setRateLimited(true);
-          setError(data.message || 'Daily limit reached. Please try again tomorrow!');
-          return;
-        }
-
-        if (data.message && data.articles.length === 0) {
-          setError(data.message);
-        }
-
-        setArticles(data.articles || []);
-        localStorage.removeItem('lastSavedPreferences');
-        return;
-      }
+      // Clear any old cached preferences
+      localStorage.removeItem('lastSavedPreferences');
 
       const data = await api.getNews(forceRefresh);
 
