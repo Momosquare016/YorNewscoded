@@ -18,22 +18,13 @@ function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    // Check if we have prefetched articles from Preferences page
-    if (location.state?.prefetchedArticles) {
-      setArticles(location.state.prefetchedArticles);
+    // Check if we have prefetched articles from Preferences (via sessionStorage)
+    const prefetchedData = sessionStorage.getItem('prefetchedArticles');
+    if (prefetchedData) {
+      sessionStorage.removeItem('prefetchedArticles');
+      setArticles(JSON.parse(prefetchedData));
       setLoading(false);
-      // Clear the state and localStorage flag since we have fresh data
-      window.history.replaceState({}, document.title);
       localStorage.removeItem('lastSavedPreferences');
-      fetchSavedArticles();
-      return;
-    }
-
-    // Check if we came from Preferences with new preferences but no prefetched articles
-    if (location.state?.newPreferences) {
-      const prefs = location.state.newPreferences;
-      window.history.replaceState({}, document.title);
-      fetchNewsWithPreferences(prefs);
       fetchSavedArticles();
       return;
     }
