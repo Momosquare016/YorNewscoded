@@ -24,11 +24,27 @@ function Preferences() {
 
   async function fetchPreferences() {
     try {
+      // Check localStorage first (source of truth to avoid DB replica lag)
+      const storedPrefs = localStorage.getItem('userPreferences');
+      if (storedPrefs) {
+        const prefs = JSON.parse(storedPrefs);
+        setCurrentPreferences(prefs);
+        if (prefs?.raw_input) {
+          setPreferenceText(prefs.raw_input);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to API
       const data = await api.getPreferences();
       setCurrentPreferences(data.preferences);
 
-      if (data.preferences?.raw_input) {
-        setPreferenceText(data.preferences.raw_input);
+      if (data.preferences) {
+        localStorage.setItem('userPreferences', JSON.stringify(data.preferences));
+        if (data.preferences.raw_input) {
+          setPreferenceText(data.preferences.raw_input);
+        }
       }
       setError('');
     } catch (err) {
@@ -53,11 +69,8 @@ function Preferences() {
       const result = await api.updatePreferences(preferenceText);
       setSuccess('Preferences saved! Loading your news...');
 
-      // Store fresh preferences for Dashboard to use (avoids DB replication lag)
-      sessionStorage.setItem('freshPreferences', JSON.stringify({
-        preferences: result.preferences,
-        timestamp: Date.now()
-      }));
+      // Store preferences in localStorage as source of truth (avoids DB replication lag)
+      localStorage.setItem('userPreferences', JSON.stringify(result.preferences));
 
       // Redirect to news
       window.location.href = '/news';

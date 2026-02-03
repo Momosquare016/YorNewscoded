@@ -59,28 +59,24 @@ function Dashboard() {
       setError('');
       setRateLimited(false);
 
-      // Check for fresh preferences from Preferences page (avoids DB replication lag)
-      const freshData = sessionStorage.getItem('freshPreferences');
+      // Always use localStorage preferences to avoid DB replication lag
+      const storedPrefs = localStorage.getItem('userPreferences');
       let data;
 
-      if (freshData) {
-        const { preferences, timestamp } = JSON.parse(freshData);
-        const ageInSeconds = (Date.now() - timestamp) / 1000;
-
-        // Only use if less than 30 seconds old
-        if (ageInSeconds < 30) {
-          sessionStorage.removeItem('freshPreferences');
-          data = await api.getNews(true, preferences);
-        } else {
-          sessionStorage.removeItem('freshPreferences');
-          data = await api.getNews(forceRefresh);
-        }
+      if (storedPrefs) {
+        const preferences = JSON.parse(storedPrefs);
+        data = await api.getNews(true, preferences);
       } else {
-        data = await api.getNews(forceRefresh);
-      }
-
-      if (!data) {
-        data = await api.getNews(forceRefresh);
+        // No local prefs - fetch from server (will also cache them)
+        const prefsData = await api.getPreferences();
+        if (prefsData.preferences) {
+          localStorage.setItem('userPreferences', JSON.stringify(prefsData.preferences));
+          data = await api.getNews(true, prefsData.preferences);
+        } else {
+          // No preferences set - redirect to set them
+          navigate('/preferences');
+          return;
+        }
       }
 
       if (data.rateLimited) {
