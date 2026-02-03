@@ -59,10 +59,29 @@ function Dashboard() {
       setError('');
       setRateLimited(false);
 
-      // Clear any old cached preferences
-      localStorage.removeItem('lastSavedPreferences');
+      // Check for fresh preferences from Preferences page (avoids DB replication lag)
+      const freshData = sessionStorage.getItem('freshPreferences');
+      let data;
 
-      const data = await api.getNews(forceRefresh);
+      if (freshData) {
+        const { preferences, timestamp } = JSON.parse(freshData);
+        const ageInSeconds = (Date.now() - timestamp) / 1000;
+
+        // Only use if less than 30 seconds old
+        if (ageInSeconds < 30) {
+          sessionStorage.removeItem('freshPreferences');
+          data = await api.getNews(true, preferences);
+        } else {
+          sessionStorage.removeItem('freshPreferences');
+          data = await api.getNews(forceRefresh);
+        }
+      } else {
+        data = await api.getNews(forceRefresh);
+      }
+
+      if (!data) {
+        data = await api.getNews(forceRefresh);
+      }
 
       if (data.rateLimited) {
         setRateLimited(true);

@@ -50,14 +50,16 @@ function Preferences() {
 
     try {
       setSubmitting(true);
-      await api.updatePreferences(preferenceText);
+      const result = await api.updatePreferences(preferenceText);
       setSuccess('Preferences saved! Loading your news...');
 
-      // Clear any old cached data
-      localStorage.removeItem('lastSavedPreferences');
+      // Store fresh preferences for Dashboard to use (avoids DB replication lag)
+      sessionStorage.setItem('freshPreferences', JSON.stringify({
+        preferences: result.preferences,
+        timestamp: Date.now()
+      }));
 
-      // Small delay to let server process, then reload
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Redirect to news
       window.location.href = '/news';
     } catch (err) {
       setError(err.message || 'Failed to save preferences');
