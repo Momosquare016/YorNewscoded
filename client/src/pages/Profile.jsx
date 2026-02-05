@@ -74,7 +74,15 @@ function Profile() {
       message.success('Profile image updated');
     } catch (err) {
       console.error('Failed to upload image:', err);
-      message.error('Failed to upload image');
+      if (err.code === 'storage/unauthorized') {
+        message.error('Storage access denied. Check Firebase Storage rules.');
+      } else if (err.code === 'storage/canceled') {
+        message.error('Upload was canceled');
+      } else if (err.code === 'storage/unknown') {
+        message.error('Unknown storage error. Check console for details.');
+      } else {
+        message.error(err.message || 'Failed to upload image');
+      }
     } finally {
       setUploading(false);
     }
