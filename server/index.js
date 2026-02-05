@@ -1,6 +1,7 @@
 // Import required libraries
-const express = require('express');      
-const cors = require('cors');          
+const express = require('express');
+const cors = require('cors');
+// Force Vercel redeploy - v2          
   
 require('dotenv').config({ path: __dirname + '/.env' });
 
