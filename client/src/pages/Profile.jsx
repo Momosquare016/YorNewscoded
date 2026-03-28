@@ -1,19 +1,35 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Layout, Typography, Card, Button, Spin, Avatar, Descriptions, message } from 'antd';
-import { SettingOutlined, BookOutlined, LogoutOutlined, CameraOutlined, LoadingOutlined } from '@ant-design/icons';
+import { Layout, Typography, Card, Button, Spin, Avatar, Descriptions, message, Switch, Select, TimePicker, Divider } from 'antd';
+import { SettingOutlined, BookOutlined, LogoutOutlined, CameraOutlined, LoadingOutlined, MailOutlined } from '@ant-design/icons';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase/config';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
+import dayjs from 'dayjs';
 
 const { Content } = Layout;
-const { Title } = Typography;
+const { Title, Text } = Typography;
+
+const DAY_OPTIONS = [
+  { value: 0, label: 'Sunday' },
+  { value: 1, label: 'Monday' },
+  { value: 2, label: 'Tuesday' },
+  { value: 3, label: 'Wednesday' },
+  { value: 4, label: 'Thursday' },
+  { value: 5, label: 'Friday' },
+  { value: 6, label: 'Saturday' },
+];
 
 function Profile() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [savingNewsletter, setSavingNewsletter] = useState(false);
+  const [newsletterEnabled, setNewsletterEnabled] = useState(false);
+  const [newsletterFrequency, setNewsletterFrequency] = useState('daily');
+  const [newsletterDay, setNewsletterDay] = useState(1);
+  const [newsletterTime, setNewsletterTime] = useState('08:00');
   const fileInputRef = useRef(null);
   const { currentUser, logout, setProfileImage } = useAuth();
   const navigate = useNavigate();
@@ -29,6 +45,11 @@ function Profile() {
       if (data.user.profile_image_url) {
         setProfileImage(data.user.profile_image_url);
       }
+      // Set newsletter state from profile data
+      setNewsletterEnabled(data.user.newsletter_enabled || false);
+      setNewsletterFrequency(data.user.newsletter_frequency || 'daily');
+      setNewsletterDay(data.user.newsletter_day ?? 1);
+      setNewsletterTime(data.user.newsletter_time || '08:00');
     } catch (err) {
       console.error('Failed to fetch profile:', err);
     } finally {
@@ -40,13 +61,11 @@ function Profile() {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       message.error('Please select an image file');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       message.error('Image size must be less than 5MB');
       return;
@@ -55,22 +74,12 @@ function Profile() {
     setUploading(true);
 
     try {
-      // Create storage reference with user's UID
       const storageRef = ref(storage, `profile-images/${currentUser.uid}`);
-
-      // Upload file to Firebase Storage
       await uploadBytes(storageRef, file);
-
-      // Get download URL
       const downloadURL = await getDownloadURL(storageRef);
-
-      // Save URL to database
       await api.updateProfileImage(downloadURL);
-
-      // Update local state
       setUserData(prev => ({ ...prev, profile_image_url: downloadURL }));
       setProfileImage(downloadURL);
-
       message.success('Profile image updated');
     } catch (err) {
       console.error('Failed to upload image:', err);
@@ -78,13 +87,29 @@ function Profile() {
         message.error('Storage access denied. Check Firebase Storage rules.');
       } else if (err.code === 'storage/canceled') {
         message.error('Upload was canceled');
-      } else if (err.code === 'storage/unknown') {
-        message.error('Unknown storage error. Check console for details.');
       } else {
         message.error(err.message || 'Failed to upload image');
       }
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleNewsletterSave() {
+    setSavingNewsletter(true);
+    try {
+      await api.updateNewsletterSettings({
+        newsletter_enabled: newsletterEnabled,
+        newsletter_frequency: newsletterFrequency,
+        newsletter_day: newsletterDay,
+        newsletter_time: newsletterTime,
+      });
+      message.success(newsletterEnabled ? 'Newsletter enabled!' : 'Newsletter disabled');
+    } catch (err) {
+      console.error('Failed to update newsletter settings:', err);
+      message.error('Failed to update newsletter settings');
+    } finally {
+      setSavingNewsletter(false);
     }
   }
 
@@ -180,6 +205,109 @@ function Profile() {
               </Descriptions.Item>
             )}
           </Descriptions>
+
+          {/* Newsletter Settings */}
+          <Divider style={{ borderColor: '#222', margin: '0 0 20px' }} />
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <MailOutlined style={{ color: '#f5c518', fontSize: 16 }} />
+              <Text style={{ color: '#fff', fontSize: 15, fontWeight: 500 }}>Newsletter</Text>
+            </div>
+
+            <div style={{
+              background: '#1a1a1a',
+              border: '1px solid #333',
+              borderRadius: 4,
+              padding: 16,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: newsletterEnabled ? 16 : 0 }}>
+                <Text style={{ color: '#ccc', fontSize: 13 }}>Email news digest</Text>
+                <Switch
+                  checked={newsletterEnabled}
+                  onChange={(checked) => setNewsletterEnabled(checked)}
+                  style={{ background: newsletterEnabled ? '#f5c518' : '#333' }}
+                />
+              </div>
+
+              {newsletterEnabled && (
+                <div>
+                  <div style={{ marginBottom: 12 }}>
+                    <Text style={{ color: '#888', fontSize: 12, display: 'block', marginBottom: 6 }}>Frequency</Text>
+                    <Select
+                      value={newsletterFrequency}
+                      onChange={(val) => setNewsletterFrequency(val)}
+                      style={{ width: '100%' }}
+                      options={[
+                        { value: 'daily', label: 'Once a day' },
+                        { value: 'weekly', label: 'Once a week' },
+                      ]}
+                    />
+                  </div>
+
+                  {newsletterFrequency === 'weekly' && (
+                    <div style={{ marginBottom: 12 }}>
+                      <Text style={{ color: '#888', fontSize: 12, display: 'block', marginBottom: 6 }}>Day of the week</Text>
+                      <Select
+                        value={newsletterDay}
+                        onChange={(val) => setNewsletterDay(val)}
+                        style={{ width: '100%' }}
+                        options={DAY_OPTIONS}
+                      />
+                    </div>
+                  )}
+
+                  <div style={{ marginBottom: 12 }}>
+                    <Text style={{ color: '#888', fontSize: 12, display: 'block', marginBottom: 6 }}>Time (UTC)</Text>
+                    <TimePicker
+                      value={dayjs(newsletterTime, 'HH:mm')}
+                      onChange={(val) => setNewsletterTime(val ? val.format('HH:mm') : '08:00')}
+                      format="HH:mm"
+                      minuteStep={15}
+                      style={{
+                        width: '100%',
+                        background: '#1a1a1a',
+                        border: '1px solid #333',
+                      }}
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleNewsletterSave}
+                    loading={savingNewsletter}
+                    block
+                    style={{
+                      background: '#f5c518',
+                      borderColor: '#f5c518',
+                      color: '#000',
+                      height: 36,
+                      fontSize: 13,
+                      fontWeight: 500,
+                      marginTop: 4,
+                    }}
+                  >
+                    Save Newsletter Settings
+                  </Button>
+                </div>
+              )}
+
+              {!newsletterEnabled && (
+                <Button
+                  onClick={handleNewsletterSave}
+                  loading={savingNewsletter}
+                  size="small"
+                  style={{
+                    background: 'transparent',
+                    borderColor: '#333',
+                    color: '#888',
+                    fontSize: 12,
+                    marginTop: 10,
+                  }}
+                >
+                  Save
+                </Button>
+              )}
+            </div>
+          </div>
 
           {/* Actions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

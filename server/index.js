@@ -14,6 +14,8 @@ const authRoutes = require('./routes/auth');
 const preferencesRoutes = require('./routes/preferences');
 const newsRoutes = require('./routes/news');
 const savedRoutes = require('./routes/saved');
+const newsletterRoutes = require('./routes/newsletter');
+const { startNewsletterScheduler } = require('./services/newsletterScheduler');
 
 // Create Express application
 const app = express();
@@ -21,8 +23,20 @@ const app = express();
 // MIDDLEWARE SETUP
 
 // 1. CORS - Allow requests from frontend (React app)
+const allowedOrigins = [
+  'https://yornews.seeleco.co',
+  'https://yornews.vercel.app',
+  'http://localhost:5173'
+];
 const corsOptions = {
-  origin: process.env.CLIENT_URL || '*',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 };
 app.use(cors(corsOptions));
@@ -76,6 +90,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/preferences', preferencesRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/saved', savedRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 
 
 // 404 handler
@@ -100,4 +115,11 @@ app.listen(PORT, () => {
   console.log(`  Preferences routes: /api/preferences/*`);
   console.log(` News routes: /api/news/*`);
   console.log(` Saved routes: /api/saved/*`);
+  console.log(` Newsletter routes: /api/newsletter/*`);
+
+  // Start newsletter scheduler
+  startNewsletterScheduler();
 });
+
+// Export for Vercel serverless
+module.exports = app;

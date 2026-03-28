@@ -122,4 +122,12 @@ export const api = {
   removeSaved: (articleId) => apiCall(`/api/saved/${articleId}`, {
     method: 'DELETE',
   }),
+
+  // Newsletter endpoints
+  getNewsletterSettings: () => apiCall('/api/newsletter'),
+
+  updateNewsletterSettings: (settings) => apiCall('/api/newsletter', {
+    method: 'PUT',
+    body: JSON.stringify(settings),
+  }),
 };

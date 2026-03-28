@@ -1,15 +1,28 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Layout, Typography, Form, Input, Button, Alert, Card } from 'antd';
+import { Layout, Typography, Form, Input, Button, Alert, Card, Checkbox, Select, TimePicker } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../utils/api';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
+const DAY_OPTIONS = [
+  { value: 0, label: 'Sunday' },
+  { value: 1, label: 'Monday' },
+  { value: 2, label: 'Tuesday' },
+  { value: 3, label: 'Wednesday' },
+  { value: 4, label: 'Thursday' },
+  { value: 5, label: 'Friday' },
+  { value: 6, label: 'Saturday' },
+];
+
 function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [newsletterEnabled, setNewsletterEnabled] = useState(false);
+  const [frequency, setFrequency] = useState('daily');
 
   const { signup } = useAuth();
   const navigate = useNavigate();
@@ -25,6 +38,23 @@ function Register() {
     try {
       setLoading(true);
       await signup(values.email, values.password);
+
+      // Save newsletter settings if opted in
+      if (newsletterEnabled) {
+        try {
+          const timeVal = values.newsletter_time;
+          const timeStr = timeVal ? timeVal.format('HH:mm') : '08:00';
+          await api.updateNewsletterSettings({
+            newsletter_enabled: true,
+            newsletter_frequency: values.newsletter_frequency || 'daily',
+            newsletter_day: values.newsletter_day ?? 1,
+            newsletter_time: timeStr,
+          });
+        } catch (err) {
+          console.warn('Newsletter settings save failed:', err.message);
+        }
+      }
+
       navigate('/preferences');
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') {
@@ -55,7 +85,7 @@ function Register() {
           background: '#111',
           border: '1px solid #222',
           width: '100%',
-          maxWidth: 400
+          maxWidth: 420
         }}
         styles={{ body: { padding: '24px 16px' } }}
         >
@@ -79,6 +109,10 @@ function Register() {
             layout="vertical"
             onFinish={handleSubmit}
             requiredMark={false}
+            initialValues={{
+              newsletter_frequency: 'daily',
+              newsletter_day: 1,
+            }}
           >
             <Form.Item
               name="email"
@@ -133,6 +167,72 @@ function Register() {
                 }}
               />
             </Form.Item>
+
+            {/* Newsletter Opt-in */}
+            <div style={{
+              background: '#1a1a1a',
+              border: '1px solid #333',
+              borderRadius: 4,
+              padding: '14px 14px 4px',
+              marginBottom: 20,
+            }}>
+              <Checkbox
+                checked={newsletterEnabled}
+                onChange={(e) => setNewsletterEnabled(e.target.checked)}
+                style={{ color: '#fff', fontSize: 13 }}
+              >
+                <span style={{ color: '#fff' }}>Send me a news digest via email</span>
+              </Checkbox>
+
+              {newsletterEnabled && (
+                <div style={{ marginTop: 14, paddingLeft: 4 }}>
+                  <Form.Item
+                    name="newsletter_frequency"
+                    label={<span style={{ color: '#888', fontSize: 12 }}>Frequency</span>}
+                    style={{ marginBottom: 12 }}
+                  >
+                    <Select
+                      onChange={(val) => setFrequency(val)}
+                      style={{ width: '100%' }}
+                      options={[
+                        { value: 'daily', label: 'Once a day' },
+                        { value: 'weekly', label: 'Once a week' },
+                      ]}
+                    />
+                  </Form.Item>
+
+                  {frequency === 'weekly' && (
+                    <Form.Item
+                      name="newsletter_day"
+                      label={<span style={{ color: '#888', fontSize: 12 }}>Day of the week</span>}
+                      style={{ marginBottom: 12 }}
+                    >
+                      <Select
+                        style={{ width: '100%' }}
+                        options={DAY_OPTIONS}
+                      />
+                    </Form.Item>
+                  )}
+
+                  <Form.Item
+                    name="newsletter_time"
+                    label={<span style={{ color: '#888', fontSize: 12 }}>Time (UTC)</span>}
+                    style={{ marginBottom: 12 }}
+                  >
+                    <TimePicker
+                      format="HH:mm"
+                      minuteStep={15}
+                      style={{
+                        width: '100%',
+                        background: '#1a1a1a',
+                        border: '1px solid #333',
+                      }}
+                      placeholder="08:00"
+                    />
+                  </Form.Item>
+                </div>
+              )}
+            </div>
 
             <Form.Item style={{ marginBottom: 16 }}>
               <Button

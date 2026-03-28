@@ -1,5 +1,6 @@
 const db = require('../db');
 const { fetchArticles } = require('../services/newsApi');
+const { fetchHackerNewsArticles } = require('../services/hackerNews');
 const { summarizeArticles, rankArticles, isRateLimited } = require('../services/groq');
 
 // GET personalized news feed
@@ -47,8 +48,20 @@ async function getNews(req, res) {
 
     console.log('User preferences:', preferences);
 
-    // Fetch fresh articles from News API
-    const articles = await fetchArticles(preferences);
+    // Fetch articles from both News API and Hacker News in parallel
+    const [newsApiArticles, hnArticles] = await Promise.all([
+      fetchArticles(preferences).catch(err => {
+        console.error('NewsAPI fetch failed:', err.message);
+        return [];
+      }),
+      fetchHackerNewsArticles(10).catch(err => {
+        console.error('Hacker News fetch failed:', err.message);
+        return [];
+      }),
+    ]);
+
+    // Merge articles - NewsAPI first, then HN
+    const articles = [...newsApiArticles, ...hnArticles];
 
     if (articles.length === 0) {
       return res.json({
@@ -57,7 +70,7 @@ async function getNews(req, res) {
       });
     }
 
-    console.log(`Fetched ${articles.length} articles from News API`);
+    console.log(`Fetched ${newsApiArticles.length} from NewsAPI + ${hnArticles.length} from Hacker News`);
 
     // Filter out articles without required fields
     const validArticles = articles.filter(article =>

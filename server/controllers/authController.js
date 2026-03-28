@@ -21,10 +21,19 @@ async function register(req, res) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
+    // Newsletter settings from registration (optional)
+    const {
+      newsletter_enabled = false,
+      newsletter_frequency = 'daily',
+      newsletter_day = 1,
+      newsletter_time = '08:00'
+    } = req.body;
+
     // Insert new user into database
     const result = await db.query(
-      'INSERT INTO users (firebase_uid, email, created_at) VALUES ($1, $2, NOW()) RETURNING *',
-      [firebase_uid, email]
+      `INSERT INTO users (firebase_uid, email, created_at, newsletter_enabled, newsletter_frequency, newsletter_day, newsletter_time, newsletter_unsubscribe_token)
+       VALUES ($1, $2, NOW(), $3, $4, $5, $6, gen_random_uuid()) RETURNING *`,
+      [firebase_uid, email, newsletter_enabled, newsletter_frequency, newsletter_day, newsletter_time]
     );
 
     const newUser = result.rows[0];
@@ -51,7 +60,7 @@ async function getProfile(req, res) {
 
     // Get user from database
     const result = await db.query(
-      'SELECT id, firebase_uid, email, preferences, profile_image_url, created_at FROM users WHERE firebase_uid = $1',
+      'SELECT id, firebase_uid, email, preferences, profile_image_url, created_at, newsletter_enabled, newsletter_frequency, newsletter_day, newsletter_time FROM users WHERE firebase_uid = $1',
       [uid]
     );
 
@@ -68,6 +77,10 @@ async function getProfile(req, res) {
         preferences: user.preferences ? JSON.parse(user.preferences) : null,
         profile_image_url: user.profile_image_url,
         created_at: user.created_at,
+        newsletter_enabled: user.newsletter_enabled || false,
+        newsletter_frequency: user.newsletter_frequency || 'daily',
+        newsletter_day: user.newsletter_day ?? 1,
+        newsletter_time: user.newsletter_time || '08:00',
       },
     });
   } catch (error) {
