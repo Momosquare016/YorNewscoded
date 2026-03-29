@@ -196,7 +196,7 @@ function Dashboard() {
           {/* Header */}
           <div className="dashboard-header">
             <Title level={1} className="dashboard-title">
-              Yornews - Your personalised news without the noise
+              Yornews
             </Title>
             <Text className="dashboard-subtitle">
               Personalized stories based on your{' '}

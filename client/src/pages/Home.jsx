@@ -41,7 +41,7 @@ function Home() {
             Your Personalized<br />News Dashboard
           </Title>
           <Paragraph className="hero-subtitle">
-            Get AI-curated news based on your interests. Stay informed with summaries powered by artificial intelligence.
+            Your personalised news without the noise
           </Paragraph>
 
           {/* CTA Buttons */}
