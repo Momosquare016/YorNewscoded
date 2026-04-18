@@ -1,6 +1,9 @@
 const db = require('../db');
 const { fetchArticles } = require('../services/newsApi');
-const { fetchHackerNewsArticles } = require('../services/hackerNews');
+const {
+  fetchHackerNewsArticles,
+  fetchHackerNewsByPreferences,
+} = require('../services/hackerNews');
 const { summarizeArticles, rankArticles, isRateLimited } = require('../services/groq');
 
 // GET personalized news feed
@@ -48,20 +51,39 @@ async function getNews(req, res) {
 
     console.log('User preferences:', preferences);
 
-    // Fetch articles from both News API and Hacker News in parallel
+    // Fetch articles from both sources in parallel.
+    //  · NewsAPI:  mainstream publisher coverage, preference-matched.
+    //  · HN:       tech/indie coverage. Algolia search when preferences exist,
+    //              front-page top stories as fallback.
+    const hasPrefs =
+      preferences &&
+      ((Array.isArray(preferences.topics) && preferences.topics.length) ||
+        (Array.isArray(preferences.categories) && preferences.categories.length) ||
+        (preferences.raw_input && String(preferences.raw_input).trim()));
+
     const [newsApiArticles, hnArticles] = await Promise.all([
-      fetchArticles(preferences).catch(err => {
+      fetchArticles(preferences).catch((err) => {
         console.error('NewsAPI fetch failed:', err.message);
         return [];
       }),
-      fetchHackerNewsArticles(10).catch(err => {
+      (hasPrefs
+        ? fetchHackerNewsByPreferences(preferences, 12, { rank: 'popularity', minPoints: 15 })
+        : fetchHackerNewsArticles(10)
+      ).catch((err) => {
         console.error('Hacker News fetch failed:', err.message);
         return [];
       }),
     ]);
 
-    // Merge articles - NewsAPI first, then HN
-    const articles = [...newsApiArticles, ...hnArticles];
+    // Merge articles, deduping by URL (HN often links to the same articles
+    // NewsAPI already surfaced). NewsAPI first = it wins on tie.
+    const seen = new Set();
+    const articles = [...newsApiArticles, ...hnArticles].filter((a) => {
+      const key = canonicalUrl(a?.url);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
     if (articles.length === 0) {
       return res.json({
@@ -137,6 +159,27 @@ async function getNews(req, res) {
       error: 'Failed to fetch news',
       details: error.message
     });
+  }
+}
+
+// Strip protocol, trailing slash, `www.`, query params, and utm_* so two
+// links to the same article dedupe. Good-enough URL canonicalisation.
+function canonicalUrl(u) {
+  if (!u) return '';
+  try {
+    const url = new URL(u);
+    url.hash = '';
+    for (const k of [...url.searchParams.keys()]) {
+      if (k.toLowerCase().startsWith('utm_') || k === 'ref' || k === 'source') {
+        url.searchParams.delete(k);
+      }
+    }
+    const host = url.host.replace(/^www\./, '');
+    const path = url.pathname.replace(/\/+$/, '');
+    const q = url.searchParams.toString();
+    return `${host}${path}${q ? '?' + q : ''}`.toLowerCase();
+  } catch {
+    return String(u).toLowerCase();
   }
 }
 
