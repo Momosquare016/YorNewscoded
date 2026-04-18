@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Layout, Button, Space, Typography, Drawer, Avatar } from 'antd';
-import { ReadOutlined, BookOutlined, SettingOutlined, UserOutlined, LogoutOutlined, MenuOutlined, CloseOutlined } from '@ant-design/icons';
+import { ReadOutlined, BookOutlined, SettingOutlined, UserOutlined, LogoutOutlined, MenuOutlined, CloseOutlined, KeyOutlined } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
 import Logo from '../assets/Logo.png';
@@ -41,6 +41,7 @@ function Navbar() {
     { to: '/news', icon: <ReadOutlined />, label: 'Dashboard' },
     { to: '/saved', icon: <BookOutlined />, label: 'Saved' },
     { to: '/preferences', icon: <SettingOutlined />, label: 'Preferences' },
+    { to: '/api-keys', icon: <KeyOutlined />, label: 'API Keys' },
     {
       to: '/profile',
       icon: profileImage ? (

@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import SavedArticles from './pages/SavedArticles';
 import Preferences from './pages/Preferences';
 import Profile from './pages/Profile';
+import ApiKeys from './pages/ApiKeys';
 
 // Import context
 import { AuthProvider } from './context/AuthContext';
@@ -79,6 +80,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/api-keys"
+                element={
+                  <ProtectedRoute>
+                    <ApiKeys />
                   </ProtectedRoute>
                 }
               />

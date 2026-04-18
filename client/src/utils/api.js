@@ -130,4 +130,16 @@ export const api = {
     method: 'PUT',
     body: JSON.stringify(settings),
   }),
+
+  // API key endpoints (for external integrations like Matteca)
+  listApiKeys: () => apiCall('/api/keys'),
+
+  createApiKey: (name) => apiCall('/api/keys', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  }),
+
+  revokeApiKey: (id) => apiCall(`/api/keys/${id}`, {
+    method: 'DELETE',
+  }),
 };

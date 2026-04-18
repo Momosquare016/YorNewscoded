@@ -15,6 +15,8 @@ const preferencesRoutes = require('./routes/preferences');
 const newsRoutes = require('./routes/news');
 const savedRoutes = require('./routes/saved');
 const newsletterRoutes = require('./routes/newsletter');
+const apiKeysRoutes = require('./routes/apiKeys');
+const v1NewsRoutes = require('./routes/v1News');
 const { startNewsletterScheduler } = require('./services/newsletterScheduler');
 
 // Create Express application
@@ -91,6 +93,8 @@ app.use('/api/preferences', preferencesRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/saved', savedRoutes);
 app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/keys', apiKeysRoutes);
+app.use('/api/v1', v1NewsRoutes);
 
 
 // 404 handler
@@ -116,6 +120,8 @@ app.listen(PORT, () => {
   console.log(` News routes: /api/news/*`);
   console.log(` Saved routes: /api/saved/*`);
   console.log(` Newsletter routes: /api/newsletter/*`);
+  console.log(` API key routes: /api/keys/*`);
+  console.log(` External v1 routes: /api/v1/*  (Bearer yorn_...)`);
 
   // Start newsletter scheduler
   startNewsletterScheduler();
