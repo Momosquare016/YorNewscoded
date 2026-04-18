@@ -218,26 +218,17 @@ function ApiKeys() {
           style={{ background: '#111', border: '1px solid #222', marginTop: 16 }}
           styles={{ body: { padding: 20 } }}
         >
-          <Text style={{ color: '#888', fontSize: 12, letterSpacing: 1 }}>USAGE</Text>
-          <Paragraph style={{ color: '#ccc', fontSize: 13, marginTop: 8 }}>
-            Pass the key as a bearer token against <Text code>GET /api/v1/news</Text>. The
-            response mirrors the personalised feed on your dashboard — articles ranked by
-            your current preferences.
+          <Text style={{ color: '#888', fontSize: 12, letterSpacing: 1 }}>
+            HOW TO USE
+          </Text>
+          <Paragraph style={{ color: '#ccc', fontSize: 13, marginTop: 8, marginBottom: 6 }}>
+            Paste this key into <Text style={{ color: '#f5c518' }}>Matteca → Settings →
+            YorNews integration</Text>. Matteca will then show your personalised news right
+            on your dashboard, using the same preferences you've set here.
           </Paragraph>
-          <pre
-            style={{
-              background: '#0a0a0a',
-              border: '1px solid #222',
-              padding: 12,
-              color: '#f5c518',
-              fontSize: 12,
-              overflow: 'auto',
-              margin: 0,
-            }}
-          >
-{`curl -H "Authorization: Bearer yorn_..." \\
-  https://<yornews-host>/api/v1/news`}
-          </pre>
+          <Paragraph style={{ color: '#666', fontSize: 12, margin: 0 }}>
+            Changed your mind? Revoke a key any time and it stops working instantly.
+          </Paragraph>
         </Card>
       </Content>
 
