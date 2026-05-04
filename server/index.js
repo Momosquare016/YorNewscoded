@@ -26,6 +26,8 @@ const app = express();
 
 // 1. CORS - Allow requests from frontend (React app)
 const allowedOrigins = [
+  'https://yornews.com',
+  'https://www.yornews.com',
   'https://yornews.seeleco.co',
   'https://yornews.vercel.app',
   'http://localhost:5173'
